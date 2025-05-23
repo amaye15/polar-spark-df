@@ -1,5 +1,7 @@
 # Polar-Spark-DF
 
+[![PyPI version](https://badge.fury.io/py/polar-spark-df.svg)](https://badge.fury.io/py/polar-spark-df)
+
 High-performance converters between PySpark and Polars DataFrames with optimized memory usage.
 
 ## Features
