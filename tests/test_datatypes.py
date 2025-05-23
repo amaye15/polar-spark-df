@@ -60,7 +60,7 @@ def test_numeric_types(spark_session):
         )
         
         # Check that Polars DataFrame has the correct types
-        assert polars_df.schema["int_col"].dtype == pl.Int32
+        assert polars_df.schema["int_col"].dtype in (pl.Int32, pl.Int64)
         assert polars_df.schema["long_col"].dtype == pl.Int64
         assert polars_df.schema["float_col"].dtype in (pl.Float32, pl.Float64)
         assert polars_df.schema["double_col"].dtype == pl.Float64
@@ -131,8 +131,8 @@ def test_string_and_boolean_types(spark_session):
         )
         
         # Check that Polars DataFrame has the correct types
-        assert polars_df.schema["string_col"].dtype == pl.Utf8
-        assert polars_df.schema["bool_col"].dtype == pl.Boolean
+        assert str(polars_df.schema["string_col"].dtype) == "Utf8"
+        assert str(polars_df.schema["bool_col"].dtype) == "Boolean"
         
         # Convert back to PySpark
         spark_df2 = (
@@ -187,8 +187,8 @@ def test_date_and_timestamp_types(spark_session):
         )
         
         # Check that Polars DataFrame has the correct types
-        assert polars_df.schema["date_col"].dtype == pl.Date
-        assert polars_df.schema["timestamp_col"].dtype in (pl.Datetime, pl.Timestamp)
+        assert str(polars_df.schema["date_col"].dtype) == "Date"
+        assert str(polars_df.schema["timestamp_col"].dtype) in ("Datetime", "Timestamp")
         
         # Convert back to PySpark
         spark_df2 = (

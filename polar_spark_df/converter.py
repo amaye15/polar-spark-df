@@ -361,7 +361,11 @@ class DataFrameConverter:
         elif len(spark_dfs) == 1:
             return spark_dfs[0]
         else:
-            return spark_dfs[0].unionAll(*spark_dfs[1:])
+            # Use unionAll for each DataFrame one by one
+            result_df = spark_dfs[0]
+            for df in spark_dfs[1:]:
+                result_df = result_df.unionAll(df)
+            return result_df
     
     def to_polars(self) -> pl.DataFrame:
         """

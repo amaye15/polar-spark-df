@@ -1,0 +1,80 @@
+{
+  "timestamp": "2025-05-23T12:46:02.224830",
+  "parameters": {
+    "num_rows": 10000,
+    "num_cols": 5,
+    "batch_sizes": [
+      1000,
+      5000,
+      10000
+    ],
+    "use_arrow": [
+      true,
+      false
+    ]
+  },
+  "spark_to_polars": {
+    "arrow=True,batch_size=1000": {
+      "execution_time": 2.3950448036193848,
+      "memory_used": 7.265625
+    },
+    "arrow=True,batch_size=5000": {
+      "execution_time": 0.2646796703338623,
+      "memory_used": 1.140625
+    },
+    "arrow=True,batch_size=10000": {
+      "execution_time": 0.24314355850219727,
+      "memory_used": 1.2890625
+    },
+    "arrow=False,batch_size=1000": {
+      "execution_time": 6.019617080688477,
+      "memory_used": 3.13671875
+    },
+    "arrow=False,batch_size=5000": {
+      "execution_time": 0.9136190414428711,
+      "memory_used": 0.7734375
+    },
+    "arrow=False,batch_size=10000": {
+      "execution_time": 0.5439238548278809,
+      "memory_used": 1.24609375
+    }
+  },
+  "polars_to_spark": {
+    "arrow=True,batch_size=1000": {
+      "execution_time": 0.05139923095703125,
+      "memory_used": 2.57421875
+    },
+    "arrow=True,batch_size=5000": {
+      "execution_time": 0.02430438995361328,
+      "memory_used": 0.2578125
+    },
+    "arrow=True,batch_size=10000": {
+      "execution_time": 0.01974344253540039,
+      "memory_used": 0.0
+    },
+    "arrow=False,batch_size=1000": {
+      "execution_time": 0.11895012855529785,
+      "memory_used": 0.0
+    },
+    "arrow=False,batch_size=5000": {
+      "execution_time": 0.028597354888916016,
+      "memory_used": 1.62109375
+    },
+    "arrow=False,batch_size=10000": {
+      "execution_time": 0.017333984375,
+      "memory_used": 0.0
+    }
+  },
+  "best_configurations": {
+    "spark_to_polars": {
+      "config": "arrow=True,batch_size=10000",
+      "execution_time": 0.24314355850219727,
+      "memory_used": 1.2890625
+    },
+    "polars_to_spark": {
+      "config": "arrow=False,batch_size=10000",
+      "execution_time": 0.017333984375,
+      "memory_used": 0.0
+    }
+  }
+}
