@@ -216,16 +216,33 @@ class DataFrameConverter:
                 empty_data[field.name] = []
             return pl.DataFrame(empty_data)
         
+        # Add a temporary row number column for efficient batching
+        from pyspark.sql.functions import monotonically_increasing_id, row_number
+        from pyspark.sql.window import Window
+        
+        # Add row numbers
+        w = Window.orderBy(monotonically_increasing_id())
+        df_with_row_num = self._spark_df.withColumn("_row_num", row_number().over(w))
+        
         # Process in batches to reduce memory usage
         polars_dfs = []
         for i in range(0, total_rows, self._batch_size):
-            # Take a batch of rows
-            batch = self._spark_df.limit(self._batch_size).offset(i)
+            end_idx = i + self._batch_size
+            
+            # Filter rows in the current batch using row numbers
+            batch = df_with_row_num.filter(
+                (df_with_row_num._row_num > i) & 
+                (df_with_row_num._row_num <= end_idx)
+            ).drop("_row_num")
             
             # Convert batch to pandas then to polars
             pandas_batch = batch.toPandas()
             polars_batch = pl.from_pandas(pandas_batch)
             polars_dfs.append(polars_batch)
+            
+            # Break if we've processed all rows
+            if end_idx >= total_rows:
+                break
         
         # Combine all batches
         if len(polars_dfs) == 1:
@@ -258,23 +275,35 @@ class DataFrameConverter:
             pl.Datetime: TimestampType(),
             pl.Time: StringType(),  # No direct equivalent
             pl.Decimal: DecimalType(38, 18),  # Default precision/scale
-            pl.List: lambda inner_type: ArrayType(inner_type),
-            pl.Struct: lambda fields: StructType(fields),
         }
+        
+        def infer_complex_type(dtype):
+            """Helper function to infer complex types."""
+            if isinstance(dtype, pl.List):
+                # Get the inner type of the list
+                inner_dtype = dtype.inner
+                if isinstance(inner_dtype, pl.List) or isinstance(inner_dtype, pl.Struct):
+                    # For nested complex types, default to string
+                    return ArrayType(StringType())
+                else:
+                    # Map the inner type
+                    inner_spark_type = infer_complex_type(inner_dtype) if hasattr(inner_dtype, '__class__') else StringType()
+                    return ArrayType(inner_spark_type)
+            elif isinstance(dtype, pl.Struct):
+                # Create struct fields
+                struct_fields = []
+                for field_name, field_dtype in dtype.fields.items():
+                    field_spark_type = infer_complex_type(field_dtype) if hasattr(field_dtype, '__class__') else StringType()
+                    struct_fields.append(StructField(field_name, field_spark_type, True))
+                return StructType(struct_fields)
+            else:
+                # Basic type
+                return polars_to_spark_type.get(dtype.__class__, StringType())
         
         schema_fields = []
         for col_name, dtype in zip(self._polars_df.columns, self._polars_df.dtypes):
-            # Handle basic types
-            if dtype.__class__ in polars_to_spark_type:
-                spark_type = polars_to_spark_type[dtype.__class__]
-                if callable(spark_type):
-                    # For complex types like List and Struct
-                    # This is a simplified version; real implementation would be more complex
-                    spark_type = StringType()  # Fallback for complex types
-            else:
-                # Default to string for unsupported types
-                spark_type = StringType()
-            
+            # Handle all types including complex ones
+            spark_type = infer_complex_type(dtype)
             schema_fields.append(StructField(col_name, spark_type, True))
         
         return StructType(schema_fields)

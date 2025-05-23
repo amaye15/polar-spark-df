@@ -5,6 +5,7 @@ Tests for data type conversions between PySpark and Polars DataFrames.
 import pytest
 import polars as pl
 import numpy as np
+import pandas as pd
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from pyspark.sql import SparkSession
