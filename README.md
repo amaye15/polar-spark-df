@@ -126,45 +126,47 @@ print_benchmark_results(results)
 
 ## Benchmark Results
 
-Benchmark run on 2025-05-23T12:45:00.000000
+Benchmark run on 2025-05-23T12:46:13
 
-Dataset: 100000 rows × 10 columns
+Dataset: 10000 rows × 5 columns
 
 ### PySpark to Polars Conversion
 
 | Configuration | Time (s) | Memory (MB) |
 |--------------|----------|-------------|
-| arrow=True,batch_size=10000 | 0.4521 | 125.45 |
-| arrow=True,batch_size=50000 | 0.3876 | 245.32 |
-| arrow=True,batch_size=100000 | 0.3654 | 412.78 |
-| arrow=False,batch_size=10000 | 1.2345 | 98.76 |
-| arrow=False,batch_size=50000 | 0.9876 | 187.65 |
-| arrow=False,batch_size=100000 | 0.8765 | 356.43 |
+| arrow=True,batch_size=1000 | 2.3950 | 7.27 |
+| arrow=True,batch_size=5000 | 0.2647 | 1.14 |
+| arrow=True,batch_size=10000 | 0.2431 | 1.29 |
+| arrow=False,batch_size=1000 | 6.0196 | 3.14 |
+| arrow=False,batch_size=5000 | 0.9136 | 0.77 |
+| arrow=False,batch_size=10000 | 0.5439 | 1.25 |
 
 ### Polars to PySpark Conversion
 
 | Configuration | Time (s) | Memory (MB) |
 |--------------|----------|-------------|
-| arrow=True,batch_size=10000 | 0.5432 | 145.67 |
-| arrow=True,batch_size=50000 | 0.4321 | 267.89 |
-| arrow=True,batch_size=100000 | 0.3987 | 432.10 |
-| arrow=False,batch_size=10000 | 1.3456 | 112.34 |
-| arrow=False,batch_size=50000 | 1.0987 | 198.76 |
-| arrow=False,batch_size=100000 | 0.9876 | 378.90 |
+| arrow=True,batch_size=1000 | 0.0514 | 2.57 |
+| arrow=True,batch_size=5000 | 0.0243 | 0.26 |
+| arrow=True,batch_size=10000 | 0.0197 | 0.00 |
+| arrow=False,batch_size=1000 | 0.1190 | 0.00 |
+| arrow=False,batch_size=5000 | 0.0286 | 1.62 |
+| arrow=False,batch_size=10000 | 0.0173 | 0.00 |
 
 ### Best Configurations
 
-- **PySpark to Polars**: arrow=True,batch_size=100000 - 0.3654s, 412.78 MB
-- **Polars to PySpark**: arrow=True,batch_size=100000 - 0.3987s, 432.10 MB
+- **PySpark to Polars**: arrow=True,batch_size=10000 - 0.2431s, 1.29 MB
+- **Polars to PySpark**: arrow=False,batch_size=10000 - 0.0173s, 0.00 MB
 
 ## Performance Recommendations
 
 Based on our benchmarks:
 
-1. **Use Apache Arrow**: Arrow-based conversion is consistently 2-3x faster than non-Arrow methods
-2. **Batch Size Tradeoff**: Larger batch sizes improve performance but increase memory usage
-3. **Optimal Configuration**: For most use cases, `arrow=True` with `batch_size=50000` provides a good balance of speed and memory usage
-4. **Memory Considerations**: For memory-constrained environments, use smaller batch sizes with Arrow enabled
+1. **Use Apache Arrow for PySpark to Polars**: Arrow-based conversion is consistently 2-3x faster for PySpark to Polars conversion
+2. **Batch Size Matters**: Larger batch sizes significantly improve performance, especially for PySpark to Polars conversion
+3. **Optimal Configuration**: 
+   - For PySpark to Polars: `arrow=True` with `batch_size=10000` provides the best performance
+   - For Polars to PySpark: `arrow=False` with `batch_size=10000` is slightly faster than using Arrow
+4. **Memory Considerations**: Memory usage is generally low for both conversion directions with the recommended configurations
 
 ## Examples
 
